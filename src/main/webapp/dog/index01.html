@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>layui测试文件</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="/js/jquery-3.3.1.js"></script>
+    <script src="/layui/layui.js"></script>
+
+    <script type="text/javascript">
+        layui.use(["form","element","table","layer"],function(){
+            var form = layui.form;
+            var element = layui.element;
+            var table = layui.table;
+            var layer = layui.layer;
+
+            form.on("submit(saveDogSubmit)",function(data){
+                // console.log(data.elem) //被执行事件的元素DOM对象，一般为button对象
+                // console.log(data.form) //被执行提交的form对象，一般在存在form标签时才会返回
+                // console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+                $.ajax({
+                    url:"saveDog",    //请求的url
+                    type:"post", //请求的类型
+                    data:"d_name="+data.field.d_name, //请求携带的参数
+                    success:function(obj){  //请求成功执行的函数
+
+                    }
+                })
+                layer.msg("添加成功",{icon:1});//提示信息
+                return false;
+            });
+
+            //table 渲染
+            table.render({
+                elem:"#dogTable",
+                id:"dogTable",
+                url:"findAllDogs",
+                done:function(){
+                    console.debug("我是回调函数");
+                }
+                ,page:true
+                ,initSort:{
+                    field:"id",
+                    type:"desc"
+                }
+                ,toolbar:"#dogAddTool"   //是否显示表头工具
+                ,cols:[[
+                    {type:"checkbox"},
+                    {field:'id',title:"编号",width:80,sort:true},
+                    {field:'d_name',title:'姓名'},
+                    {title:'操作',templet:"#dogTableRightTool"}
+                ]]
+            });
+            //添加dogTable的event事件
+            table.on("toolbar(dogTable)",function(obj){
+                var layevent = obj.event;
+                //判断触发的事件
+                if(layevent==="saveDog"){//执行dog信息的新增
+                    layer.open({
+                        title:"新增dog",
+                        area:["400px"],
+                        btn:false,
+                        content:$("#saveDogForm").html(),
+
+                    })
+                }
+            });
+
+            //tool事件
+            table.on("tool(dogTable)",function(obj){
+                var layevent = obj.event;
+                // console.debug(obj);
+                // console.debug(obj.data.id)  //获取指定的字段value
+
+
+                if(layevent==="editDog"){ //编辑dog信息
+                    alert("你好 编辑");
+                }else if(layevent==="deleteDogById"){ //删除dog信息
+                    layer.confirm("是否确认删除",{
+                        title:"提示信息", //默认为信息
+                        btn:["确认","取消"]
+                    },function(index){
+                        $.ajax({
+                            url:"removeDogById",
+                            type:"post",
+                            data:"id="+obj.data.id,
+                            success:function(obj){ //删除成功执行的操作
+                                layer.close(index);
+                                table.reload("dogTable",{
+                                    page:{
+                                        curr:1  //重新重第一页开始
+                                    }
+                                });//重载表格
+
+                            }
+                        })
+                    },function(){
+                       alert("点击了取消哦");
+                    });
+                }
+            });
+
+            //submit form 提交监听
+            form.on("submit(dogSave)",function(data){
+                $.ajax({
+                    url:"saveDog",
+                    type:"post",
+                    data:"d_name="+data.field.d_name,
+                    success:function(){
+                        //渲染数据表格
+                        table.reload("dogTable",{
+                            page:{
+                                curr:1
+                            }
+                        });
+                    }
+                });
+
+                layer.msg("新增成功",{icon:1});
+                return false;
+             })
+
+
+
+        })
+
+    </script>
+<!--dogTable(dog数据表的工具)-->
+    <script id="dogAddTool" type="text/html">
+        <button lay-event="saveDog" class="layui-btn layui-btn-sm">添加</button>
+
+</script>
+    <!--dogTable():最后面的模板工具-->
+    <script type="text/html" id="dogTableRightTool">
+        <div class="layui-btn-group">
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="editDog">编辑</a>
+            <a class="layui-btn layui-btn-xs" lay-event="deleteDogById">删除</a>
+        </div>
+</script>
+    <!--点击新增按钮实现的form窗口-->
+    <script type="text/html" id="saveDogForm">
+        <form class="layui-form" lay-filter="saveDogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" lay-verify="required" required id="dName" name="d_name" placeholder="请输入姓名">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <input class="layui-btn" lay-submit="" lay-filter="dogSave" value="确认" >
+                </div>
+            </div>
+        </form>
+</script>
+</head>
+<body>
+
+    <form class="layui-form" lay-filter="saveDog">
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input class="layui-input" required lay-verify="required" id="d_name" name="d_name">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="saveDogSubmit">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+
+        </div>
+    </form>
+
+
+<!--渲染dog信息-->
+<table class="layui-table" id="dogTable" lay-filter="dogTable">
+
+</table>
+</body>
+</html>

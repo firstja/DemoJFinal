@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>layui测试文件</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="/js/jquery-3.3.1.js"></script>
+    <script src="/layui/layui.js"></script>
+
+    <script type="text/javascript">
+        layui.use(["form","element","table","layer"],function(){
+            //获取模块对象
+            var form = layui.form;
+            var element = layui.element;
+            var table = layui.table;
+            var layer = layui.layer;
+
+            //表格渲染
+            table.render({
+                elem:"#dogInfoTable", //绑定的元素
+                url:"findAllDogs",
+                page:true, //是否开启分页
+                limit:5, //每页显示的记录数
+                done:function(){
+
+                }
+                ,toolbar:"#dogInfoTableToolBar"
+                ,initSort:{
+                    field:"id",  //排序的字段
+                    type:"desc"  //排序类型
+                }
+                ,cols:[[
+                    {type:'checkbox'}
+                    ,{field:'id',title:'编号',sort:true,width:80}
+                    ,{field:'d_name',title:'姓名',width:100}
+                    ,{title:'操作',templet:"#dogInfoTableTool"}
+                ]]
+            })
+            //table的toolbar事件监听
+            table.on("toolbar(dogInfoFilter)",function(obj){
+                var layevent = obj.event;//获取事件
+                if(layevent==="addDog"){  //判断事件
+                    layer.open({
+                        title:"新增dog",
+                        area:["400px"],
+                        btn:false,
+                        content:$("#addDogForm").html(),
+                        success:function(obj){ //弹出成功的回调
+
+                        }
+                    })
+                }
+            })
+            //dogInfoTable的右侧事件
+            table.on("tool(dogInfoTable)",function(obj){
+
+            })
+
+
+        })
+
+    </script>
+<!--dogInfoTable绑定的工具条-->
+<script type="text/html" id="dogInfoTableToolBar">
+    <div class="layui-btn-group">
+        <a class="layui-btn layui-btn-sm" lay-event="addDog">添加</a>
+    </div>
+</script>
+    <!--添加Dog的form窗体内容-->
+    <script type="text/html" id="addDogForm">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-block">
+                    <input class="layui-input" lay-verify="required" required placeholder="请输入姓名">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <input  lay-submit="" class="layui-btn layui-btn-normal layui-btn-sm" lay-filter="addDogSubmit" value="确认">
+                </div>
+            </div>
+        </form>
+</script>
+    <!--dogInfoTable表格最右边的模板工具-->
+    <script type="text/html" id="dogInfoTableTool">
+        <div class="layui-btn-group">
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="deleteDog">删除</a>
+            <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="editDog">编辑</a>
+        </div>
+</script>
+</head>
+<body>
+    <!--dog信息渲染-->
+    <table class="layui-table" id="dogInfoTable" lay-filter="dogInfoFilter"></table>
+</body>
+</html>

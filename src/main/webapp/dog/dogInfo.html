@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <script src="/js/jquery-3.3.1.js"></script>
+    <script src="/layui/layui.js"></script>
+
+    <script type="text/javascript">
+        layui.use(["form","element","table","layer"],function(){
+            var form = layui.form;
+            var element = layui.element;
+            var table = layui.table;
+            var layer = layui.layer;
+
+
+            table.render({
+                elem:"#dogTable",
+                id:"demo",
+                height:300,
+                url:"findAllDogs"
+                ,minWidth:100
+                ,page:true
+                ,cols:[[
+                    {field:'d_id',title:'编号',sort:true,fixed:'left'},
+                    {field:'d_name',title:'姓名'}
+                ]]
+                ,done:function(){
+                    console.debug("回到函数");
+                }
+                ,initSort:{
+                    field:'d_id',
+                    type:'desc'
+                }
+
+            })
+
+        })
+
+    </script>
+</head>
+<body>
+
+    <table id="dogTable" class="layui-table" lay-filter="dogTable">
+
+    </table>
+</body>
+</html>
